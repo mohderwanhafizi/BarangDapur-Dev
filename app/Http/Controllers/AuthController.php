@@ -24,32 +24,29 @@ class AuthController extends Controller
     }
 
     public function callback()
-    {
-        try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+{
+    try {
+        $googleUser = Socialite::driver('google')->stateless()->user();
+        
+        $user = User::firstOrCreate(
+            ['email' => $googleUser->getEmail()],
+            [
+                'name' => $googleUser->getName(),
+                'password' => bcrypt(Str::random(16)),
+                'email_verified_at' => now(),
+            ]
+        );
 
-            // Cari user atau cipta user baru
-            $user = User::firstOrCreate(
-                ['email' => $googleUser->getEmail()],
-                [
-                    'name' => $googleUser->getName(),
-                    'password' => bcrypt(Str::random(16)), // Guna Str::random yang diimport
-                    'email_verified_at' => now(),
-                ]
-            );
+        Auth::login($user, true);
+        $this->inventoryService->syncGuestItems($user->email, $user->id);
 
-            Auth::login($user, true);
+        return redirect()->intended('/dashboard');
 
-            // Sync barang dari Guest ke akaun User
-            $this->inventoryService->syncGuestItems($user->email, $user->id);
-
-            return redirect()->intended('/dashboard')->with('success', 'Berjaya log masuk!');
-
-        } catch (Exception $e) {
-            // Jika masih ada error malformed, mesej $e->getMessage() akan beritahu puncanya
-            return redirect('/login')->with('error', 'Gagal log masuk: ' . $e->getMessage());
-        }
+    } catch (Exception $e) {
+        // Ini SANGAT PENTING untuk debug kenapa connection putus
+        dd($e->getMessage()); 
     }
+}
 
     /**
      * Log masuk manual
