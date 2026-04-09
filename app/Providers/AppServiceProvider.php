@@ -19,10 +19,9 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-    {
-       // Paksa HTTPS jika aplikasi berjalan di local (Ngrok) atau production
-        //if (app()->environment('local', 'production')) {
-        //    URL::forceScheme('https');
-       // }
+  {
+    if (env('APP_ENV') !== 'local' || env('FORCE_HTTPS')) {
+        URL::forceScheme('https');
     }
+}
 }
