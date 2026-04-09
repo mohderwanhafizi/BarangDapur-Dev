@@ -18,11 +18,14 @@ class ProductController extends Controller
         ]);
 
         $product = $productService->saveGuestProduct($validated, $validated['email']);
-
-        // Auto-login user supaya dashboard nanti boleh papar data beliau
         Auth::loginUsingId($product->user_id);
 
-        // Redirect ke page kejayaan
         return redirect()->route('products.success');
+    }
+
+    public function dashboard()
+    {
+        $products = Auth::user()->products()->latest()->get();
+        return view('dashboard', compact('products'));
     }
 }

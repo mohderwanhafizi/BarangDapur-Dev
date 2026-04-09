@@ -7,6 +7,14 @@ use App\Services\DataGovService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\AuthController;
 
+use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () { return view('scan'); }); // Page scan/input
+Route::post('/products/guest', [ProductController::class, 'storeGuest'])->name('products.storeGuest');
+Route::get('/success', function () { return view('success'); })->name('products.success');
+Route::get('/dashboard', [ProductController::class, 'dashboard'])->middleware('auth')->name('dashboard');
+
 // 1. Halaman Utama: Login Page
 Route::get('/', function () {
     // Jika user dah login, terus campak ke dashboard. Tak perlu tengok page login lagi.
